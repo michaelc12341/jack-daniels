@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webapp Login</title>
+    <link rel="stylesheet" type="text/css" href="styles3.css">
+</head>
+
+<body>
+    <header>
+        <h1>Webapp</h1>
+        <p>Log in to continue.</p>
+    </header>
+
+    <main>
+        <section>
+            <form id="login" name="login">
+                <fieldset>
+                    <legend><strong>Login</strong></legend>
+
+                    <p>
+                        <label for="email">Email:</label><br>
+                        <input type="email" name="email" id="email"
+                               size="30" placeholder="Email Address"
+                               autocomplete="username" required>
+                    </p>
+
+                    <p>
+                        <label for="password">Password:</label><br>
+                        <input type="password" name="password" id="password"
+                               size="30" placeholder="Password"
+                               autocomplete="current-password" required>
+                    </p>
+
+                    <p>
+                        <input id="submit" type="submit" value="Login">
+                        <input id="reset" type="reset" value="Reset">
+                    </p>
+                    <p>Don't have an account? <a href="Registration.html">Register</a>.</p>
+                    <p id="login-message" role="status" aria-live="polite"></p>
+                </fieldset>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p id="validation">
+            <a href="https://validator.w3.org/nu/" title="HTML5 Validation">
+                HTML5 Validation
+            </a>
+        </p>
+    </footer>
+
+    <script>
+        const loginForm = document.getElementById("login");
+
+        loginForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+            const submitButton = document.getElementById("submit");
+            const message = document.getElementById("login-message");
+
+            message.textContent = "";
+            submitButton.disabled = true;
+            submitButton.value = "Logging in...";
+
+            try {
+                const response = await fetch("http://localhost:3000/api/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        Password: password
+                    })
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(result.message || "Login failed. Check your email and password.");
+                }
+
+                // Redirect only after the server confirms a successful login.
+                // Store the email only after successful authentication. Never store the password.
+                sessionStorage.setItem("loggedInEmail", email);
+                window.location.href = "dashboard.html";
+            } catch (error) {
+                message.textContent = error.message || "Could not connect to the login server.";
+                submitButton.disabled = false;
+                submitButton.value = "Login";
+            }
+        });
+    </script>
+</body>
+</html>
